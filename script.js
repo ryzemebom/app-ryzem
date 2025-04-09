@@ -6,6 +6,11 @@ function loadTasks() {
     taskList.innerHTML = '';
 
     tasks.forEach((task, index) => {
+
+        if (tasks.length > 0) {
+
+}
+
         const li = document.createElement('li');
 
         if (editingIndex === index) {
@@ -66,6 +71,15 @@ function loadTasks() {
             li.appendChild(editButton);
             li.appendChild(deleteButton);
         }
+if ("Notification" in window && Notification.permission === "granted") {
+    const pendingTasks = tasks.filter(task => !task.completed);
+    if (pendingTasks.length > 0) {
+        const notification = new Notification("Você tem tarefas pendentes!", {
+            body: `Total de pendentes: ${pendingTasks.length}`,
+            icon: "/icon.png" // opcional: coloque o caminho de um ícone legal
+        });
+    }
+}
 
         taskList.appendChild(li);
     });
@@ -198,6 +212,73 @@ document.getElementById('taskInput').addEventListener('keydown', function(event)
     }
 });
 
-window.onload = loadTasks;
 
 
+function showNotification(message, duration = 4000) {
+    const container = document.getElementById('notification-container') || createNotificationContainer();
+
+    const notif = document.createElement('div');
+    notif.className = 'notification';
+    notif.textContent = message;
+    container.appendChild(notif);
+
+    setTimeout(() => {
+        notif.remove();
+    }, duration);
+}
+
+function createNotificationContainer() {
+    const container = document.createElement('div');
+    container.id = 'notification-container';
+    container.style.position = 'fixed';
+    container.style.top = '1rem';
+    container.style.right = '1rem';
+    container.style.zIndex = 9999;
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '10px';
+    document.body.appendChild(container);
+    return container;
+}
+
+
+window.onload = () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme'); 
+        document.querySelector('.container').classList.add('dark-theme');
+    }
+
+    loadTasks();  // Carrega as tarefas ao carregar a página
+
+    // Solicita permissão para notificação
+    if ("Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                console.log("Permissão de notificação concedida.");
+            }
+        });
+    }
+};
+
+
+
+// Função para verificar tarefas pendentes e notificar
+function notifyPendingTasks() {
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    const pendingTasks = tasks.filter(task => !task.completed);
+
+    if (
+        "Notification" in window &&
+        Notification.permission === "granted" &&
+        pendingTasks.length > 0
+    ) {
+        new Notification("Você ainda tem tarefas pendentes!", {
+            body: `Total: ${pendingTasks.length}`,
+            icon: "/icon.png" // opcional
+        });
+    }
+}
+setInterval(() => {
+    notifyPendingTasks();
+}, 10000); 
