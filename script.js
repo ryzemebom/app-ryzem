@@ -243,23 +243,25 @@ function createNotificationContainer() {
 
 
 window.onload = () => {
+    // Tema salvo
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
-        document.body.classList.add('dark-theme'); 
+        document.body.classList.add('dark-theme');
         document.querySelector('.container').classList.add('dark-theme');
     }
 
-    loadTasks();  // Carrega as tarefas ao carregar a página
+    // Carrega as tarefas
+    loadTasks();
 
-    // Solicita permissão para notificação
+    // Solicita permissão para notificações
     if ("Notification" in window && Notification.permission !== "granted") {
-        Notification.requestPermission().then(permission => {
-            if (permission === "granted") {
-                console.log("Permissão de notificação concedida.");
-            }
-        });
+        Notification.requestPermission();
     }
+
+    // Loop de notificação a cada 30s
+    setInterval(notifyPendingTasks, 30000);
 };
+
 
 
 
