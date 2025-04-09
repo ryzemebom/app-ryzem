@@ -112,38 +112,46 @@ function saveTask(index, newText) {
         document.getElementById('loadingSpinner').style.display = 'none'; 
     }, 500);
 }
-
-
 function addTask() {
     const taskInput = document.getElementById('taskInput');
+    if (!taskInput) {
+        alert('Campo de input não encontrado!');
+        return;
+    }
+
     const taskText = taskInput.value.trim();
 
     if (taskText !== '') {
-        document.getElementById('loadingSpinner').style.display = 'flex'; // Mostrar o spinner ao adicionar a tarefa
+        document.getElementById('loadingSpinner').style.display = 'flex';
 
-        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        
-        if (editingIndex !== null) {
-            tasks[editingIndex].text = taskText;
-            editingIndex = null;
-            document.querySelector('.add-task-button').textContent = 'Adicionar';
-        } else {
+        try {
+            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
             const newTask = {
                 text: taskText,
                 completed: false
             };
             tasks.push(newTask);
+
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            taskInput.value = '';
+        } catch (e) {
+            console.error("Erro ao adicionar tarefa:", e);
+            alert("Erro ao salvar a tarefa. Verifique se o armazenamento está disponível.");
         }
 
-        localStorage.setItem('tasks', JSON.stringify(tasks));
-        taskInput.value = ''; // Limpa o campo de input
-
         setTimeout(() => {
-            loadTasks();
-            document.getElementById('loadingSpinner').style.display = 'none'; // Esconde o spinner
+            try {
+                loadTasks();
+            } catch (e) {
+                console.error("Erro ao carregar tarefas:", e);
+            } finally {
+                document.getElementById('loadingSpinner').style.display = 'none';
+            }
         }, 500);
     }
 }
+
 
 function deleteTask(index) {
     document.getElementById('loadingSpinner').style.display = 'flex';
