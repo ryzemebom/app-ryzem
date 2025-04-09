@@ -281,6 +281,6 @@ function notifyPendingTasks() {
 }
 setInterval(() => {
     notifyPendingTasks();
-}, 10000); 
+}, 50000); 
 
 
