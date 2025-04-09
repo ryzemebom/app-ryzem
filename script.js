@@ -71,15 +71,6 @@ function loadTasks() {
             li.appendChild(editButton);
             li.appendChild(deleteButton);
         }
-if ("Notification" in window && Notification.permission === "granted") {
-    const pendingTasks = tasks.filter(task => !task.completed);
-    if (pendingTasks.length > 0) {
-        const notification = new Notification("Você tem tarefas pendentes!", {
-            body: `Total de pendentes: ${pendingTasks.length}`,
-            icon: "/icon.png" // opcional: coloque o caminho de um ícone legal
-        });
-    }
-}
 
         taskList.appendChild(li);
     });
@@ -242,44 +233,4 @@ function createNotificationContainer() {
 }
 
 
-window.onload = () => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark-theme'); 
-        document.querySelector('.container').classList.add('dark-theme');
-    }
-
-    loadTasks();  // Carrega as tarefas ao carregar a página
-
-    // Solicita permissão para notificação
-    if ("Notification" in window && Notification.permission !== "granted") {
-        Notification.requestPermission().then(permission => {
-            if (permission === "granted") {
-                console.log("Permissão de notificação concedida.");
-            }
-        });
-    }
-};
-
-// Função para verificar tarefas pendentes e notificar
-function notifyPendingTasks() {
-    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-    const pendingTasks = tasks.filter(task => !task.completed);
-
-    if (
-        "Notification" in window &&
-        Notification.permission === "granted" &&
-        pendingTasks.length > 0
-    ) {
-        new Notification("Você ainda tem tarefas pendentes!", {
-            body: `Total: ${pendingTasks.length}`,
-            icon: "/task.png" // opcional
-        });
-    }
-}
-// A cada 30 segundos, verifica e notifica
-setInterval(() => {
-    notifyPendingTasks();
-}, 30000); // 30 segundos
-
-
+window.onload 
