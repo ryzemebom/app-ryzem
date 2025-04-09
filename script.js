@@ -112,46 +112,38 @@ function saveTask(index, newText) {
         document.getElementById('loadingSpinner').style.display = 'none'; 
     }, 500);
 }
+
+
 function addTask() {
     const taskInput = document.getElementById('taskInput');
-    if (!taskInput) {
-        alert('Campo de input não encontrado!');
-        return;
-    }
-
     const taskText = taskInput.value.trim();
 
     if (taskText !== '') {
-        document.getElementById('loadingSpinner').style.display = 'flex';
+        document.getElementById('loadingSpinner').style.display = 'flex'; // Mostrar o spinner ao adicionar a tarefa
 
-        try {
-            const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        
+        if (editingIndex !== null) {
+            tasks[editingIndex].text = taskText;
+            editingIndex = null;
+            document.querySelector('.add-task-button').textContent = 'Adicionar';
+        } else {
             const newTask = {
                 text: taskText,
                 completed: false
             };
             tasks.push(newTask);
-
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            taskInput.value = '';
-        } catch (e) {
-            console.error("Erro ao adicionar tarefa:", e);
-            alert("Erro ao salvar a tarefa. Verifique se o armazenamento está disponível.");
         }
 
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+        taskInput.value = ''; // Limpa o campo de input
+
         setTimeout(() => {
-            try {
-                loadTasks();
-            } catch (e) {
-                console.error("Erro ao carregar tarefas:", e);
-            } finally {
-                document.getElementById('loadingSpinner').style.display = 'none';
-            }
+            loadTasks();
+            document.getElementById('loadingSpinner').style.display = 'none'; // Esconde o spinner
         }, 500);
     }
 }
-
 
 function deleteTask(index) {
     document.getElementById('loadingSpinner').style.display = 'flex';
@@ -203,7 +195,14 @@ window.addEventListener('load', () => {
     }
 });
 
-
+window.onload = () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme'); 
+        document.querySelector('.container').classList.add('dark-theme');
+    }
+    loadTasks();  // Carrega as tarefas ao carregar a página
+};
 
 
 document.getElementById('taskInput').addEventListener('keydown', function(event) {
@@ -244,37 +243,23 @@ function createNotificationContainer() {
 
 
 window.onload = () => {
-    // Aplica tema salvo
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
         document.body.classList.add('dark-theme'); 
         document.querySelector('.container').classList.add('dark-theme');
     }
 
-    // Testa se o localStorage está funcional
-    try {
-        localStorage.setItem('test', 'ok');
-        if (localStorage.getItem('test') !== 'ok') {
-            alert("LocalStorage parece não estar funcionando.");
-        }
-    } catch (e) {
-        alert("Erro com localStorage: " + e.message);
-    }
+    loadTasks();  // Carrega as tarefas ao carregar a página
 
-    // Carrega as tarefas
-    loadTasks();
-
-    // Solicita permissão de notificação
+    // Solicita permissão para notificação
     if ("Notification" in window && Notification.permission !== "granted") {
-        Notification.requestPermission();
+        Notification.requestPermission().then(permission => {
+            if (permission === "granted") {
+                console.log("Permissão de notificação concedida.");
+            }
+        });
     }
-
-    // Inicia notificação periódica
-    setInterval(notifyPendingTasks, 30000);
 };
-
-
-
 
 // Função para verificar tarefas pendentes e notificar
 function notifyPendingTasks() {
@@ -288,10 +273,13 @@ function notifyPendingTasks() {
     ) {
         new Notification("Você ainda tem tarefas pendentes!", {
             body: `Total: ${pendingTasks.length}`,
-            icon: "/icon.png" // opcional
+            icon: "/task.png" // opcional
         });
     }
 }
+// A cada 30 segundos, verifica e notifica
 setInterval(() => {
     notifyPendingTasks();
-}, 30000); 
+}, 30000); // 30 segundos
+
+
