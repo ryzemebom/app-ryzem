@@ -203,14 +203,7 @@ window.addEventListener('load', () => {
     }
 });
 
-window.onload = () => {
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark-theme'); 
-        document.querySelector('.container').classList.add('dark-theme');
-    }
-    loadTasks();  // Carrega as tarefas ao carregar a página
-};
+
 
 
 document.getElementById('taskInput').addEventListener('keydown', function(event) {
@@ -251,22 +244,32 @@ function createNotificationContainer() {
 
 
 window.onload = () => {
-    // Tema salvo
+    // Aplica tema salvo
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
-        document.body.classList.add('dark-theme');
+        document.body.classList.add('dark-theme'); 
         document.querySelector('.container').classList.add('dark-theme');
+    }
+
+    // Testa se o localStorage está funcional
+    try {
+        localStorage.setItem('test', 'ok');
+        if (localStorage.getItem('test') !== 'ok') {
+            alert("LocalStorage parece não estar funcionando.");
+        }
+    } catch (e) {
+        alert("Erro com localStorage: " + e.message);
     }
 
     // Carrega as tarefas
     loadTasks();
 
-    // Solicita permissão para notificações
+    // Solicita permissão de notificação
     if ("Notification" in window && Notification.permission !== "granted") {
         Notification.requestPermission();
     }
 
-    // Loop de notificação a cada 30s
+    // Inicia notificação periódica
     setInterval(notifyPendingTasks, 30000);
 };
 
